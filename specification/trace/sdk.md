@@ -41,6 +41,7 @@ weight: 3
       - [Compatibility warnings for `ProbabilitySampler`](#compatibility-warnings-for-probabilitysampler)
     + [ParentBased](#parentbased)
     + [JaegerRemoteSampler](#jaegerremotesampler)
+    + [AlwaysRecord](#alwaysrecord)
     + [CompositeSampler](#compositesampler)
       - [ComposableSampler](#composablesampler)
         * [GetSamplingIntent](#getsamplingintent)
@@ -602,6 +603,25 @@ The following configuration properties should be available when creating the sam
 [jaeger-remote-sampling]: https://www.jaegertracing.io/docs/1.41/architecture/sampling/#remote-sampling
 [jaeger-remote-sampling-api]: https://www.jaegertracing.io/docs/1.41/architecture/apis/#remote-sampling-configuration-stable
 [jaeger-adaptive-sampling]: https://www.jaegertracing.io/docs/1.41/architecture/sampling/#adaptive-sampling
+
+#### AlwaysRecord
+
+**Status**: [Development](../document-status.md)
+
+`AlwaysRecord` is a sampler decorator that ensures every span is passed to
+the `SpanProcessor`, even those that would normally be dropped. It does this
+by converting `DROP` decisions from the wrapped sampler into `RECORD_ONLY`,
+decisions, allowing processors to see all spans without sending them to
+exporters. This is typically used to do accurate span-to-metrics processing.
+
+* Root sampler returns `DROP` -> AlwaysRecord returns `RECORD_ONLY`
+* Root sampler returns `RECORD_ONLY` -> AlwaysRecord returns `RECORD_ONLY`
+* Root sampler returns `RECORD_AND_SAMPLE` -> AlwaysRecord returns `RECORD_AND_SAMPLE`
+
+Required parameters:
+
+* `root(Sampler)` - The sampler being wrapped; it provides the original
+sample/drop decision that AlwaysRecord modifies.
 
 #### CompositeSampler
 
